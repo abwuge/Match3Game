@@ -12,6 +12,7 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(Match3Game src/main.cpp)
+add_executable(Match3Game src/main.cpp src/Game.cpp)
+target_include_directories(Match3Game PRIVATE include)
 target_compile_features(Match3Game PRIVATE cxx_std_17)
 target_link_libraries(Match3Game PRIVATE SFML::Graphics)
