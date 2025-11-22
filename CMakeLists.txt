@@ -12,7 +12,10 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(Match3Game src/main.cpp src/Game.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS "include/*.h")
+
+add_executable(Match3Game ${SOURCES})
 target_include_directories(Match3Game PRIVATE include)
 target_compile_features(Match3Game PRIVATE cxx_std_17)
 target_link_libraries(Match3Game PRIVATE SFML::Graphics)

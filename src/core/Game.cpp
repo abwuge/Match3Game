@@ -1,17 +1,6 @@
-#include "Game.h"
+#include "core/Game.h"
+#include "utils/ColorManager.h"
 #include <random>
-
-sf::Color getColor(int colorIndex) {
-    switch(colorIndex) {
-        case 0: return sf::Color(255, 150, 150); // Light Red
-        case 1: return sf::Color(150, 255, 150); // Light Green
-        case 2: return sf::Color(150, 200, 255); // Light Blue
-        case 3: return sf::Color(255, 255, 150); // Light Yellow
-        case 4: return sf::Color(255, 200, 150); // Light Orange
-        case 5: return sf::Color(220, 180, 255); // Light Purple
-        default: return sf::Color::White;
-    }
-}
 
 void initializeGrid(std::vector<std::vector<Tile>>& grid, float windowSize) {
     std::random_device rd;
@@ -29,7 +18,7 @@ void initializeGrid(std::vector<std::vector<Tile>>& grid, float windowSize) {
             float y = i * tileSize + padding;
             
             grid[i][j].color = dis(gen);
-            grid[i][j].fillColor = getColor(grid[i][j].color);
+            grid[i][j].fillColor = ColorManager::getColor(grid[i][j].color);
             
             grid[i][j].centerH.setSize(sf::Vector2f(shapeSize - cornerRadius * 2, shapeSize));
             grid[i][j].centerH.setPosition(sf::Vector2f(x + cornerRadius, y));
