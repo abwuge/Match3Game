@@ -2,17 +2,25 @@
 #include "core/Game.h"
 #include "ui/MainMenu.h"
 
+enum class AppState
+{
+    MainMenu,
+    Playing,
+    Settings
+};
+
 int main()
 {
     auto desktop = sf::VideoMode::getDesktopMode();
-    unsigned int windowSize = static_cast<unsigned int>(std::min(desktop.size.x, desktop.size.y) * 0.8f);
+    unsigned int windowSize = static_cast<unsigned int>(std::min(desktop.size.x, desktop.size.y) * 0.7f);
 
     auto window = sf::RenderWindow(sf::VideoMode({windowSize, windowSize}), "Match 3 Game", sf::Style::Close);
     window.setFramerateLimit(144);
 
     MainMenu menu(static_cast<float>(windowSize), static_cast<float>(windowSize));
-    
-    std::vector<std::vector<Tile>> grid(GRID_SIZE, std::vector<Tile>(GRID_SIZE));
+    Game game(static_cast<float>(windowSize));
+
+    AppState appState = AppState::MainMenu;
     bool gameInitialized = false;
 
     while (window.isOpen())
@@ -23,29 +31,36 @@ int main()
             {
                 window.close();
             }
-            
-            menu.handleEvent(event.value(), window);
+
+            if (appState == AppState::MainMenu)
+            {
+                ButtonAction action = menu.handleEvent(event.value(), window);
+                if (action == ButtonAction::StartGame)
+                {
+                    appState = AppState::Playing;
+                }
+                else if (action == ButtonAction::OpenSettings)
+                {
+                    appState = AppState::Settings;
+                }
+            }
         }
 
         window.clear(sf::Color(245, 245, 245));
 
-        if (menu.getState() == MenuState::MainMenu) {
+        if (appState == AppState::MainMenu)
+        {
             menu.draw(window);
-        } else if (menu.getState() == MenuState::Playing) {
-            if (!gameInitialized) {
-                initializeGrid(grid, static_cast<float>(windowSize));
+        }
+        else if (appState == AppState::Playing)
+        {
+            if (!gameInitialized)
+            {
+                game.initialize();
                 gameInitialized = true;
             }
-            
-            drawGrid(window, static_cast<float>(windowSize), GRID_SIZE);
 
-            for (int i = 0; i < GRID_SIZE; i++)
-            {
-                for (int j = 0; j < GRID_SIZE; j++)
-                {
-                    drawTile(window, grid[i][j]);
-                }
-            }
+            game.render(window);
         }
 
         window.display();

@@ -2,7 +2,24 @@
 #include "utils/ColorManager.h"
 #include <random>
 
-void initializeGrid(std::vector<std::vector<Tile>>& grid, float windowSize) {
+Game::Game(float windowSize) 
+    : windowSize(windowSize), grid(GRID_SIZE, std::vector<Tile>(GRID_SIZE)) {
+}
+
+void Game::initialize() {
+    initializeGrid();
+}
+
+void Game::render(sf::RenderWindow& window) {
+    drawGrid(window);
+    for(int i = 0; i < GRID_SIZE; i++) {
+        for(int j = 0; j < GRID_SIZE; j++) {
+            drawTile(window, grid[i][j]);
+        }
+    }
+}
+
+void Game::initializeGrid() {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, NUM_COLORS - 1);
@@ -41,13 +58,13 @@ void initializeGrid(std::vector<std::vector<Tile>>& grid, float windowSize) {
     }
 }
 
-void drawGrid(sf::RenderWindow& window, float windowSize, int gridSize) {
-    float tileSize = windowSize / gridSize;
+void Game::drawGrid(sf::RenderWindow& window) {
+    float tileSize = windowSize / GRID_SIZE;
     
     sf::RectangleShape line;
     line.setFillColor(sf::Color(180, 180, 180, 200));
     
-    for(int i = 0; i <= gridSize; i++) {
+    for(int i = 0; i <= GRID_SIZE; i++) {
         line.setSize(sf::Vector2f(windowSize, 2.f));
         line.setPosition(sf::Vector2f(0.f, i * tileSize));
         window.draw(line);
@@ -58,7 +75,7 @@ void drawGrid(sf::RenderWindow& window, float windowSize, int gridSize) {
     }
 }
 
-void drawTile(sf::RenderWindow& window, const Tile& tile) {
+void Game::drawTile(sf::RenderWindow& window, const Tile& tile) {
     window.draw(tile.centerH);
     window.draw(tile.centerV);
     for(int i = 0; i < 4; i++) {

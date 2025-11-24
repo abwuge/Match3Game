@@ -1,6 +1,6 @@
 #include "ui/MainMenu.h"
 
-MainMenu::MainMenu(float windowWidth, float windowHeight) : state(MenuState::MainMenu) {
+MainMenu::MainMenu(float windowWidth, float windowHeight) {
     float buttonWidth = 120.f;
     float buttonHeight = 120.f;
     float centerX = windowWidth / 2.f;
@@ -45,9 +45,7 @@ bool MainMenu::isMouseOver(const sf::RectangleShape& button, const sf::Vector2f&
     return button.getGlobalBounds().contains(mousePos);
 }
 
-void MainMenu::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
-    if (state != MenuState::MainMenu) return;
-    
+ButtonAction MainMenu::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
     if (event.is<sf::Event::MouseMoved>()) {
         sf::Vector2f mousePos = sf::Vector2f(window.mapPixelToCoords(sf::Mouse::getPosition(window)));
         
@@ -69,17 +67,17 @@ void MainMenu::handleEvent(const sf::Event& event, const sf::RenderWindow& windo
             sf::Vector2f mousePos = sf::Vector2f(window.mapPixelToCoords(sf::Mouse::getPosition(window)));
             
             if (isMouseOver(startButton, mousePos)) {
-                state = MenuState::Playing;
+                return ButtonAction::StartGame;
             } else if (isMouseOver(settingsButton, mousePos)) {
-                // Settings functionality to be implemented
+                return ButtonAction::OpenSettings;
             }
         }
     }
+    
+    return ButtonAction::None;
 }
 
 void MainMenu::draw(sf::RenderWindow& window) {
-    if (state != MenuState::MainMenu) return;
-    
     window.draw(startButton);
     window.draw(settingsButton);
     window.draw(startIcon);

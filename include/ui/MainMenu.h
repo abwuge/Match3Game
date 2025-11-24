@@ -2,23 +2,20 @@
 
 #include <SFML/Graphics.hpp>
 
-enum class MenuState {
-    MainMenu,
-    Playing,
-    Settings
+enum class ButtonAction {
+    None,
+    StartGame,
+    OpenSettings
 };
 
 class MainMenu {
 public:
     MainMenu(float windowWidth, float windowHeight);
     
-    void handleEvent(const sf::Event& event, const sf::RenderWindow& window);
+    ButtonAction handleEvent(const sf::Event& event, const sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
-    MenuState getState() const { return state; }
-    void setState(MenuState newState) { state = newState; }
 
 private:
-    MenuState state;
     sf::RectangleShape startButton;
     sf::RectangleShape settingsButton;
     sf::CircleShape startIcon;
