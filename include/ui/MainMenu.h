@@ -1,23 +1,21 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "core/Scene.h"
 #include "StartButton.h"
 #include "SettingsButton.h"
 
-enum class ButtonAction {
-    None,
-    StartGame,
-    OpenSettings
-};
-
-class MainMenu {
+class MainMenu : public Scene
+{
 public:
     MainMenu(float windowWidth, float windowHeight);
-    
-    ButtonAction handleEvent(const sf::Event& event, const sf::RenderWindow& window);
-    void draw(sf::RenderWindow& window);
+
+    void handleEvent(const sf::Event &event) override;
+    void render(sf::RenderWindow &window) override;
 
 private:
     StartButton startButton;
     SettingsButton settingsButton;
+    float windowWidth;
+    float windowHeight;
 };

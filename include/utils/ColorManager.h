@@ -8,7 +8,8 @@ const int sfYellow = 3;
 const int sfOrange = 4;
 const int sfPurple = 5;
 
-class ColorManager {
+class ColorManager
+{
 public:
     static sf::Color getColor(int colorIndex);
 };

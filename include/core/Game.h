@@ -2,11 +2,13 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include "Scene.h"
 
 const int GRID_SIZE = 8;
 const int NUM_COLORS = 6;
 
-struct Tile {
+struct Tile
+{
     int color;
     sf::RectangleShape centerH;
     sf::RectangleShape centerV;
@@ -14,18 +16,21 @@ struct Tile {
     sf::Color fillColor;
 };
 
-class Game {
+class Game : public Scene
+{
 public:
     Game(float windowSize);
-    
-    void initialize();
-    void render(sf::RenderWindow& window);
-    
+
+    void onEnter() override;
+    void handleEvent(const sf::Event &event) override;
+    void render(sf::RenderWindow &window) override;
+
 private:
     float windowSize;
     std::vector<std::vector<Tile>> grid;
-    
+    bool initialized = false;
+
     void initializeGrid();
-    void drawGrid(sf::RenderWindow& window);
-    void drawTile(sf::RenderWindow& window, const Tile& tile);
+    void drawGrid(sf::RenderWindow &window);
+    void drawTile(sf::RenderWindow &window, const Tile &tile);
 };

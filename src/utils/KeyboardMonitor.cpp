@@ -1,10 +1,10 @@
 #include "utils/KeyboardMonitor.h"
 
-void KeyboardMonitor::handleEvent(const sf::Event& event)
+void KeyboardMonitor::handleEvent(const sf::Event &event)
 {
-    if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
+    if (const auto *keyPressed = event.getIf<sf::Event::KeyPressed>())
     {
-        for (const auto& [key, callback] : callbacks)
+        for (const auto &[key, callback] : callbacks)
         {
             if (keyPressed->code == toSFMLKey(key))
             {
@@ -29,13 +29,13 @@ sf::Keyboard::Key KeyboardMonitor::toSFMLKey(GlobalKey key) const
 {
     switch (key)
     {
-        case GlobalKey::Backspace:
-            return sf::Keyboard::Key::Backspace;
-        case GlobalKey::Space:
-            return sf::Keyboard::Key::Space;
-        case GlobalKey::Enter:
-            return sf::Keyboard::Key::Enter;
-        default:
-            return sf::Keyboard::Key::Unknown;
+    case GlobalKey::Backspace:
+        return sf::Keyboard::Key::Backspace;
+    case GlobalKey::Space:
+        return sf::Keyboard::Key::Space;
+    case GlobalKey::Enter:
+        return sf::Keyboard::Key::Enter;
+    default:
+        return sf::Keyboard::Key::Unknown;
     }
 }

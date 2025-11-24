@@ -16,7 +16,7 @@ class KeyboardMonitor
 public:
     using KeyCallback = std::function<void()>;
 
-    void handleEvent(const sf::Event& event);
+    void handleEvent(const sf::Event &event);
     void setCallback(GlobalKey key, KeyCallback callback);
     void clearCallback(GlobalKey key);
 

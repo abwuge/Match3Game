@@ -1,11 +1,12 @@
 #pragma once
 #include "Button.h"
 
-class SettingsButton : public Button {
+class SettingsButton : public Button
+{
 public:
-    SettingsButton(const sf::Vector2f& position);
-    
-    void draw(sf::RenderWindow& window) override;
+    SettingsButton(const sf::Vector2f &position);
+
+    void draw(sf::RenderWindow &window) override;
 
 private:
     sf::CircleShape icon1;

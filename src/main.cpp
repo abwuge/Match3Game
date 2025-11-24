@@ -1,14 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include "core/Game.h"
+#include "core/SceneManager.h"
 #include "ui/MainMenu.h"
 #include "utils/KeyboardMonitor.h"
-
-enum class AppState
-{
-    MainMenu,
-    Playing,
-    Settings
-};
 
 int main()
 {
@@ -18,19 +12,16 @@ int main()
     auto window = sf::RenderWindow(sf::VideoMode({windowSize, windowSize}), "Match 3 Game", sf::Style::Close);
     window.setFramerateLimit(144);
 
-    MainMenu menu(static_cast<float>(windowSize), static_cast<float>(windowSize));
-    Game game(static_cast<float>(windowSize));
+    SceneManager sceneManager(window);
     KeyboardMonitor keyboardMonitor;
 
-    AppState appState = AppState::MainMenu;
-    bool gameInitialized = false;
+    sceneManager.registerScene("menu", std::make_unique<MainMenu>(static_cast<float>(windowSize), static_cast<float>(windowSize)));
+    sceneManager.registerScene("game", std::make_unique<Game>(static_cast<float>(windowSize)));
 
-    keyboardMonitor.setCallback(GlobalKey::Backspace, [&appState]() {
-        if (appState == AppState::Playing || appState == AppState::Settings)
-        {
-            appState = AppState::MainMenu;
-        }
-    });
+    sceneManager.pushScene("menu");
+
+    keyboardMonitor.setCallback(GlobalKey::Backspace, [&sceneManager]()
+                                { sceneManager.popScene(); });
 
     while (window.isOpen())
     {
@@ -42,38 +33,11 @@ int main()
             }
 
             keyboardMonitor.handleEvent(event.value());
-
-            if (appState == AppState::MainMenu)
-            {
-                ButtonAction action = menu.handleEvent(event.value(), window);
-                if (action == ButtonAction::StartGame)
-                {
-                    appState = AppState::Playing;
-                }
-                else if (action == ButtonAction::OpenSettings)
-                {
-                    appState = AppState::Settings;
-                }
-            }
+            sceneManager.handleEvent(event.value());
         }
 
         window.clear(sf::Color(245, 245, 245));
-
-        if (appState == AppState::MainMenu)
-        {
-            menu.draw(window);
-        }
-        else if (appState == AppState::Playing)
-        {
-            if (!gameInitialized)
-            {
-                game.initialize();
-                gameInitialized = true;
-            }
-
-            game.render(window);
-        }
-
+        sceneManager.render();
         window.display();
     }
 }

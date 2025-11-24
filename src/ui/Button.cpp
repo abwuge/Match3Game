@@ -1,49 +1,62 @@
 #include "ui/Button.h"
 
-Button::Button(const sf::Vector2f& position, const sf::Vector2f& size, const sf::Color& color) 
-    : normalColor(color), hoverColor(color) {
+Button::Button(const sf::Vector2f &position, const sf::Vector2f &size, const sf::Color &color)
+    : normalColor(color), hoverColor(color)
+{
     shape.setSize(size);
     shape.setPosition(position);
     shape.setFillColor(color);
 }
 
-void Button::setPosition(const sf::Vector2f& position) {
+void Button::setPosition(const sf::Vector2f &position)
+{
     shape.setPosition(position);
 }
 
-void Button::setSize(const sf::Vector2f& size) {
+void Button::setSize(const sf::Vector2f &size)
+{
     shape.setSize(size);
 }
 
-void Button::setColor(const sf::Color& color) {
+void Button::setColor(const sf::Color &color)
+{
     normalColor = color;
     shape.setFillColor(color);
 }
 
-void Button::setHoverColor(const sf::Color& color) {
+void Button::setHoverColor(const sf::Color &color)
+{
     hoverColor = color;
 }
 
-bool Button::isMouseOver(const sf::Vector2f& mousePos) const {
+bool Button::isMouseOver(const sf::Vector2f &mousePos) const
+{
     return shape.getGlobalBounds().contains(mousePos);
 }
 
-void Button::updateHover(const sf::Vector2f& mousePos) {
-    if (isMouseOver(mousePos)) {
+void Button::updateHover(const sf::Vector2f &mousePos)
+{
+    if (isMouseOver(mousePos))
+    {
         shape.setFillColor(hoverColor);
-    } else {
+    }
+    else
+    {
         shape.setFillColor(normalColor);
     }
 }
 
-sf::RectangleShape& Button::getShape() {
+sf::RectangleShape &Button::getShape()
+{
     return shape;
 }
 
-const sf::RectangleShape& Button::getShape() const {
+const sf::RectangleShape &Button::getShape() const
+{
     return shape;
 }
 
-void Button::draw(sf::RenderWindow& window) {
+void Button::draw(sf::RenderWindow &window)
+{
     window.draw(shape);
 }
