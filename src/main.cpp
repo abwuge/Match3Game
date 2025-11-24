@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "core/Game.h"
 #include "ui/MainMenu.h"
+#include "utils/KeyboardMonitor.h"
 
 enum class AppState
 {
@@ -19,9 +20,17 @@ int main()
 
     MainMenu menu(static_cast<float>(windowSize), static_cast<float>(windowSize));
     Game game(static_cast<float>(windowSize));
+    KeyboardMonitor keyboardMonitor;
 
     AppState appState = AppState::MainMenu;
     bool gameInitialized = false;
+
+    keyboardMonitor.setCallback(GlobalKey::Backspace, [&appState]() {
+        if (appState == AppState::Playing || appState == AppState::Settings)
+        {
+            appState = AppState::MainMenu;
+        }
+    });
 
     while (window.isOpen())
     {
@@ -31,6 +40,8 @@ int main()
             {
                 window.close();
             }
+
+            keyboardMonitor.handleEvent(event.value());
 
             if (appState == AppState::MainMenu)
             {
