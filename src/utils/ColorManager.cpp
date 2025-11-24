@@ -1,22 +1,28 @@
 #include "utils/ColorManager.h"
 
+const std::vector<sf::Color> &ColorManager::getAllColors()
+{
+    static const std::vector<sf::Color> colors = {
+        sf::Color(255, 150, 150),
+        sf::Color(150, 255, 150),
+        sf::Color(150, 200, 255),
+        sf::Color(255, 255, 150),
+        sf::Color(255, 200, 150),
+        sf::Color(220, 180, 255),
+        sf::Color(255, 180, 200),
+        sf::Color(180, 255, 220),
+        sf::Color(200, 180, 255),
+        sf::Color(255, 220, 180)
+    };
+    return colors;
+}
+
 sf::Color ColorManager::getColor(int colorIndex)
 {
-    switch (colorIndex)
+    const auto &colors = getAllColors();
+    if (colorIndex >= 0 && colorIndex < static_cast<int>(colors.size()))
     {
-    case 0:
-        return sf::Color(255, 150, 150);
-    case 1:
-        return sf::Color(150, 255, 150);
-    case 2:
-        return sf::Color(150, 200, 255);
-    case 3:
-        return sf::Color(255, 255, 150);
-    case 4:
-        return sf::Color(255, 200, 150);
-    case 5:
-        return sf::Color(220, 180, 255);
-    default:
-        return sf::Color::White;
+        return colors[colorIndex];
     }
+    return sf::Color::White;
 }

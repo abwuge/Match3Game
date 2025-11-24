@@ -1,7 +1,8 @@
 #include <SFML/Graphics.hpp>
-#include "core/Game.h"
 #include "core/SceneManager.h"
 #include "ui/MainMenu.h"
+#include "ui/SettingsScene.h"
+#include "ui/GameBoard.h"
 #include "utils/KeyboardMonitor.h"
 
 int main()
@@ -16,7 +17,8 @@ int main()
     KeyboardMonitor keyboardMonitor;
 
     sceneManager.registerScene("menu", std::make_unique<MainMenu>(static_cast<float>(windowSize), static_cast<float>(windowSize)));
-    sceneManager.registerScene("game", std::make_unique<Game>(static_cast<float>(windowSize)));
+    sceneManager.registerScene("game", std::make_unique<GameBoard>(static_cast<float>(windowSize)));
+    sceneManager.registerScene("settings", std::make_unique<SettingsScene>(static_cast<float>(windowSize), static_cast<float>(windowSize)));
 
     sceneManager.pushScene("menu");
 

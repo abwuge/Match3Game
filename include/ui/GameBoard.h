@@ -1,23 +1,15 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <vector>
-#include "Scene.h"
+#include <memory>
+#include "core/Scene.h"
+#include "core/GameLogic.h"
 #include "utils/RoundedRectangle.h"
 
-const int GRID_SIZE = 8;
-const int NUM_COLORS = 6;
-
-struct Tile
-{
-    int color;
-    RoundedRectangle shape;
-};
-
-class Game : public Scene
+class GameBoard : public Scene
 {
 public:
-    Game(float windowSize);
+    GameBoard(float windowSize);
 
     void onEnter() override;
     void handleEvent(const sf::Event &event) override;
@@ -25,10 +17,11 @@ public:
 
 private:
     float windowSize;
-    std::vector<std::vector<Tile>> grid;
+    std::shared_ptr<GameLogic> gameLogic;
+    std::vector<std::vector<RoundedRectangle>> shapes;
     bool initialized = false;
 
-    void initializeGrid();
+    void initializeGame();
+    void initializeShapes();
     void drawGrid(sf::RenderWindow &window);
-    void drawTile(sf::RenderWindow &window, const Tile &tile);
 };
