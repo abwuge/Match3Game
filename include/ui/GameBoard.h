@@ -46,6 +46,12 @@ private:
     sf::Vector2i pendingSwapTile1 = sf::Vector2i(-1, -1);
     sf::Vector2i pendingSwapTile2 = sf::Vector2i(-1, -1);
 
+    bool isDragging = false;
+    sf::Vector2i dragStartTile = sf::Vector2i(-1, -1);
+    sf::Vector2f dragStartPos;
+    sf::Vector2f dragCurrentPos;
+    sf::Vector2i dragTargetTile = sf::Vector2i(-1, -1);
+
     void initializeGame();
     void initializeShapes();
     void drawGrid(sf::RenderWindow &window);

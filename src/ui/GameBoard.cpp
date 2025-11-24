@@ -27,13 +27,98 @@ void GameBoard::handleEvent(const sf::Event &event)
         if (event.getIf<sf::Event::MouseButtonPressed>()->button == sf::Mouse::Button::Left)
         {
             float tileSize = getTileSize();
-            int col = static_cast<int>(event.getIf<sf::Event::MouseButtonPressed>()->position.x / tileSize);
-            int row = static_cast<int>(event.getIf<sf::Event::MouseButtonPressed>()->position.y / tileSize);
+            sf::Vector2f mousePos(event.getIf<sf::Event::MouseButtonPressed>()->position.x,
+                                  event.getIf<sf::Event::MouseButtonPressed>()->position.y);
+            int col = static_cast<int>(mousePos.x / tileSize);
+            int row = static_cast<int>(mousePos.y / tileSize);
 
             if (row >= 0 && row < gameLogic->getHeight() && col >= 0 && col < gameLogic->getWidth())
             {
-                handleTileClick(row, col);
+                isDragging = true;
+                dragStartTile = sf::Vector2i(col, row);
+                dragStartPos = mousePos;
+                dragCurrentPos = mousePos;
+                dragTargetTile = sf::Vector2i(-1, -1);
             }
+        }
+    }
+    else if (event.is<sf::Event::MouseMoved>())
+    {
+        if (isDragging && gameState == GameState::Idle)
+        {
+            float tileSize = getTileSize();
+            dragCurrentPos = sf::Vector2f(event.getIf<sf::Event::MouseMoved>()->position.x,
+                                          event.getIf<sf::Event::MouseMoved>()->position.y);
+            
+            sf::Vector2f delta = dragCurrentPos - dragStartPos;
+            float absDx = std::abs(delta.x);
+            float absDy = std::abs(delta.y);
+            float threshold = tileSize * 0.3f;
+            
+            if (absDx > threshold || absDy > threshold)
+            {
+                sf::Vector2i newTargetTile(-1, -1);
+                
+                if (absDx > absDy)
+                {
+                    if (delta.x > threshold)
+                    {
+                        newTargetTile = sf::Vector2i(dragStartTile.x + 1, dragStartTile.y);
+                    }
+                    else if (delta.x < -threshold)
+                    {
+                        newTargetTile = sf::Vector2i(dragStartTile.x - 1, dragStartTile.y);
+                    }
+                }
+                else
+                {
+                    if (delta.y > threshold)
+                    {
+                        newTargetTile = sf::Vector2i(dragStartTile.x, dragStartTile.y + 1);
+                    }
+                    else if (delta.y < -threshold)
+                    {
+                        newTargetTile = sf::Vector2i(dragStartTile.x, dragStartTile.y - 1);
+                    }
+                }
+                
+                if (newTargetTile.x >= 0 && newTargetTile.x < gameLogic->getWidth() &&
+                    newTargetTile.y >= 0 && newTargetTile.y < gameLogic->getHeight())
+                {
+                    dragTargetTile = newTargetTile;
+                }
+                else
+                {
+                    dragTargetTile = sf::Vector2i(-1, -1);
+                }
+            }
+            else
+            {
+                dragTargetTile = sf::Vector2i(-1, -1);
+            }
+        }
+    }
+    else if (event.is<sf::Event::MouseButtonReleased>())
+    {
+        if (event.getIf<sf::Event::MouseButtonReleased>()->button == sf::Mouse::Button::Left)
+        {
+            if (isDragging)
+            {
+                if (dragTargetTile.x != -1 && dragTargetTile.y != -1)
+                {
+                    startSwapAnimation(dragStartTile, dragTargetTile);
+                }
+                else
+                {
+                    int col = dragStartTile.x;
+                    int row = dragStartTile.y;
+                    handleTileClick(row, col);
+                }
+            }
+            
+            isDragging = false;
+            dragStartTile = sf::Vector2i(-1, -1);
+            dragTargetTile = sf::Vector2i(-1, -1);
         }
     }
 }
@@ -72,7 +157,54 @@ void GameBoard::render(sf::RenderWindow &window)
         
         for (int j = 0; j < width; j++)
         {
+            if (isDragging && dragStartTile.x == j && dragStartTile.y == i)
+            {
+                continue;
+            }
+            if (isDragging && dragTargetTile.x == j && dragTargetTile.y == i)
+            {
+                continue;
+            }
             window.draw(shapes[i][j]);
+        }
+    }
+
+    if (isDragging && dragStartTile.x != -1)
+    {
+        float tileSize = getTileSize();
+        float padding = getPadding();
+        sf::Vector2f delta = dragCurrentPos - dragStartPos;
+        
+        sf::Vector2f startTileBasePos(dragStartTile.x * tileSize + padding, 
+                                      dragStartTile.y * tileSize + padding);
+        
+        float absDx = std::abs(delta.x);
+        float absDy = std::abs(delta.y);
+        sf::Vector2f clampedDelta = delta;
+        
+        if (absDx > absDy)
+        {
+            clampedDelta.y = 0;
+            clampedDelta.x = std::max(-tileSize, std::min(tileSize, delta.x));
+        }
+        else
+        {
+            clampedDelta.x = 0;
+            clampedDelta.y = std::max(-tileSize, std::min(tileSize, delta.y));
+        }
+        
+        RoundedRectangle draggedShape = shapes[dragStartTile.y][dragStartTile.x];
+        draggedShape.setPosition(startTileBasePos + clampedDelta);
+        window.draw(draggedShape);
+        
+        if (dragTargetTile.x != -1 && dragTargetTile.y != -1)
+        {
+            sf::Vector2f targetTileBasePos(dragTargetTile.x * tileSize + padding,
+                                           dragTargetTile.y * tileSize + padding);
+            
+            RoundedRectangle targetShape = shapes[dragTargetTile.y][dragTargetTile.x];
+            targetShape.setPosition(targetTileBasePos - clampedDelta);
+            window.draw(targetShape);
         }
     }
 
@@ -159,13 +291,14 @@ void GameBoard::updateAnimation()
                 isSwapReversing = true;
                 gameLogic->swapTiles(swapTile1.y, swapTile1.x, swapTile2.y, swapTile2.x);
 
-                sf::Vector2f temp = startPositions[swapTile1.y][swapTile1.x];
+                float tileSize = getTileSize();
+                float padding = getPadding();
+                
                 startPositions[swapTile1.y][swapTile1.x] = targetPositions[swapTile1.y][swapTile1.x];
-                targetPositions[swapTile1.y][swapTile1.x] = temp;
+                targetPositions[swapTile1.y][swapTile1.x] = sf::Vector2f(swapTile1.x * tileSize + padding, swapTile1.y * tileSize + padding);
 
-                temp = startPositions[swapTile2.y][swapTile2.x];
                 startPositions[swapTile2.y][swapTile2.x] = targetPositions[swapTile2.y][swapTile2.x];
-                targetPositions[swapTile2.y][swapTile2.x] = temp;
+                targetPositions[swapTile2.y][swapTile2.x] = sf::Vector2f(swapTile2.x * tileSize + padding, swapTile2.y * tileSize + padding);
 
                 animationClock.restart();
                 return;
@@ -413,8 +546,35 @@ void GameBoard::startSwapAnimation(const sf::Vector2i &tile1, const sf::Vector2i
     float tileSize = getTileSize();
     float padding = getPadding();
 
-    startPositions[tile1.y][tile1.x] = shapes[tile1.y][tile1.x].getPosition();
-    startPositions[tile2.y][tile2.x] = shapes[tile2.y][tile2.x].getPosition();
+    if (isDragging)
+    {
+        sf::Vector2f delta = dragCurrentPos - dragStartPos;
+        float absDx = std::abs(delta.x);
+        float absDy = std::abs(delta.y);
+        sf::Vector2f clampedDelta = delta;
+        
+        if (absDx > absDy)
+        {
+            clampedDelta.y = 0;
+            clampedDelta.x = std::max(-tileSize, std::min(tileSize, delta.x));
+        }
+        else
+        {
+            clampedDelta.x = 0;
+            clampedDelta.y = std::max(-tileSize, std::min(tileSize, delta.y));
+        }
+        
+        sf::Vector2f tile1BasePos(tile1.x * tileSize + padding, tile1.y * tileSize + padding);
+        sf::Vector2f tile2BasePos(tile2.x * tileSize + padding, tile2.y * tileSize + padding);
+        
+        startPositions[tile1.y][tile1.x] = tile1BasePos + clampedDelta;
+        startPositions[tile2.y][tile2.x] = tile2BasePos - clampedDelta;
+    }
+    else
+    {
+        startPositions[tile1.y][tile1.x] = shapes[tile1.y][tile1.x].getPosition();
+        startPositions[tile2.y][tile2.x] = shapes[tile2.y][tile2.x].getPosition();
+    }
 
     targetPositions[tile1.y][tile1.x] = sf::Vector2f(tile2.x * tileSize + padding, tile2.y * tileSize + padding);
     targetPositions[tile2.y][tile2.x] = sf::Vector2f(tile1.x * tileSize + padding, tile1.y * tileSize + padding);
