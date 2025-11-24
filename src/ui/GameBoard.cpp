@@ -2,6 +2,7 @@
 #include "utils/ColorManager.h"
 #include "utils/GameConfig.h"
 #include <algorithm>
+#include <cmath>
 
 GameBoard::GameBoard(float windowSize)
     : windowSize(windowSize)
@@ -16,6 +17,25 @@ void GameBoard::onEnter()
 
 void GameBoard::handleEvent(const sf::Event &event)
 {
+    if (event.is<sf::Event::MouseButtonPressed>())
+    {
+        if (gameState != GameState::Idle)
+        {
+            return;
+        }
+
+        if (event.getIf<sf::Event::MouseButtonPressed>()->button == sf::Mouse::Button::Left)
+        {
+            float tileSize = getTileSize();
+            int col = static_cast<int>(event.getIf<sf::Event::MouseButtonPressed>()->position.x / tileSize);
+            int row = static_cast<int>(event.getIf<sf::Event::MouseButtonPressed>()->position.y / tileSize);
+
+            if (row >= 0 && row < gameLogic->getHeight() && col >= 0 && col < gameLogic->getWidth())
+            {
+                handleTileClick(row, col);
+            }
+        }
+    }
 }
 
 void GameBoard::render(sf::RenderWindow &window)
@@ -28,6 +48,9 @@ void GameBoard::render(sf::RenderWindow &window)
     if (gameState != GameState::Idle)
     {
         updateAnimation();
+    }
+    else if (scalingTile.x != -1)
+    {
     }
 
     drawGrid(window);
@@ -52,6 +75,8 @@ void GameBoard::render(sf::RenderWindow &window)
             window.draw(shapes[i][j]);
         }
     }
+
+    drawSelectedHighlight(window);
 }
 
 void GameBoard::initializeGame()
@@ -116,36 +141,82 @@ void GameBoard::initializeShapes()
 void GameBoard::updateAnimation()
 {
     float elapsed = animationClock.getElapsedTime().asSeconds();
-    float duration = 0.8f;
+    float duration = (gameState == GameState::Swapping) ? 0.3f : 0.8f;
     
     if (elapsed >= duration)
     {
         int height = gameLogic->getHeight();
         int width = gameLogic->getWidth();
         
-        for (int i = 0; i < height; i++)
+        if (gameState == GameState::Swapping)
         {
-            for (int j = 0; j < width; j++)
+            shapes[swapTile1.y][swapTile1.x].setPosition(targetPositions[swapTile1.y][swapTile1.x]);
+            shapes[swapTile2.y][swapTile2.x].setPosition(targetPositions[swapTile2.y][swapTile2.x]);
+
+            auto matches = gameLogic->findMatches();
+            if (matches.empty() && !isSwapReversing)
             {
-                shapes[i][j].setPosition(targetPositions[i][j]);
+                isSwapReversing = true;
+                gameLogic->swapTiles(swapTile1.y, swapTile1.x, swapTile2.y, swapTile2.x);
+
+                sf::Vector2f temp = startPositions[swapTile1.y][swapTile1.x];
+                startPositions[swapTile1.y][swapTile1.x] = targetPositions[swapTile1.y][swapTile1.x];
+                targetPositions[swapTile1.y][swapTile1.x] = temp;
+
+                temp = startPositions[swapTile2.y][swapTile2.x];
+                startPositions[swapTile2.y][swapTile2.x] = targetPositions[swapTile2.y][swapTile2.x];
+                targetPositions[swapTile2.y][swapTile2.x] = temp;
+
+                animationClock.restart();
+                return;
+            }
+            else
+            {
+                gameState = GameState::CheckingMatches;
+                checkAndClearMatches();
             }
         }
-        
-        if (gameState == GameState::FallingInitial)
+        else
         {
-            gameState = GameState::CheckingMatches;
-            checkAndClearMatches();
-        }
-        else if (gameState == GameState::FallingAfterClear)
-        {
-            gameState = GameState::CheckingMatches;
-            checkAndClearMatches();
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    shapes[i][j].setPosition(targetPositions[i][j]);
+                }
+            }
+            
+            if (gameState == GameState::FallingInitial)
+            {
+                gameState = GameState::CheckingMatches;
+                checkAndClearMatches();
+            }
+            else if (gameState == GameState::FallingAfterClear)
+            {
+                gameState = GameState::CheckingMatches;
+                checkAndClearMatches();
+            }
         }
         
         return;
     }
     
     float t = elapsed / duration;
+    
+    if (gameState == GameState::Swapping)
+    {
+        sf::Vector2f startPos1 = startPositions[swapTile1.y][swapTile1.x];
+        sf::Vector2f targetPos1 = targetPositions[swapTile1.y][swapTile1.x];
+        sf::Vector2f pos1 = startPos1 + (targetPos1 - startPos1) * t;
+        shapes[swapTile1.y][swapTile1.x].setPosition(pos1);
+
+        sf::Vector2f startPos2 = startPositions[swapTile2.y][swapTile2.x];
+        sf::Vector2f targetPos2 = targetPositions[swapTile2.y][swapTile2.x];
+        sf::Vector2f pos2 = startPos2 + (targetPos2 - startPos2) * t;
+        shapes[swapTile2.y][swapTile2.x].setPosition(pos2);
+
+        return;
+    }
     
     int height = gameLogic->getHeight();
     int width = gameLogic->getWidth();
@@ -288,6 +359,138 @@ float GameBoard::getTileSize() const
 float GameBoard::getPadding() const
 {
     return getTileSize() * 0.12f;
+}
+
+void GameBoard::handleTileClick(int row, int col)
+{
+    sf::Vector2i clickedTile(col, row);
+
+    if (selectedTile.x == -1)
+    {
+        selectedTile = clickedTile;
+        scalingTile = clickedTile;
+        currentScale = 1.0f;
+        targetScale = 1.18f;
+        scaleClock.restart();
+    }
+    else
+    {
+        if (selectedTile == clickedTile)
+        {
+            scalingTile = selectedTile;
+            currentScale = 1.18f;
+            targetScale = 1.0f;
+            scaleClock.restart();
+            selectedTile = sf::Vector2i(-1, -1);
+        }
+        else if (areAdjacent(selectedTile, clickedTile))
+        {
+            scalingTile = selectedTile;
+            currentScale = 1.18f;
+            targetScale = 1.0f;
+            scaleClock.restart();
+            pendingSwapTile1 = selectedTile;
+            pendingSwapTile2 = clickedTile;
+            selectedTile = sf::Vector2i(-1, -1);
+        }
+        else
+        {
+            scalingTile = selectedTile;
+            currentScale = 1.18f;
+            targetScale = 1.0f;
+            scaleClock.restart();
+            selectedTile = clickedTile;
+        }
+    }
+}
+
+void GameBoard::startSwapAnimation(const sf::Vector2i &tile1, const sf::Vector2i &tile2)
+{
+    swapTile1 = tile1;
+    swapTile2 = tile2;
+    isSwapReversing = false;
+
+    float tileSize = getTileSize();
+    float padding = getPadding();
+
+    startPositions[tile1.y][tile1.x] = shapes[tile1.y][tile1.x].getPosition();
+    startPositions[tile2.y][tile2.x] = shapes[tile2.y][tile2.x].getPosition();
+
+    targetPositions[tile1.y][tile1.x] = sf::Vector2f(tile2.x * tileSize + padding, tile2.y * tileSize + padding);
+    targetPositions[tile2.y][tile2.x] = sf::Vector2f(tile1.x * tileSize + padding, tile1.y * tileSize + padding);
+
+    gameLogic->swapTiles(tile1.y, tile1.x, tile2.y, tile2.x);
+
+    gameState = GameState::Swapping;
+    animationClock.restart();
+}
+
+bool GameBoard::areAdjacent(const sf::Vector2i &tile1, const sf::Vector2i &tile2) const
+{
+    int dx = std::abs(tile1.x - tile2.x);
+    int dy = std::abs(tile1.y - tile2.y);
+    return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
+}
+
+void GameBoard::drawSelectedHighlight(sf::RenderWindow &window)
+{
+    if (scalingTile.x != -1 && scalingTile.y != -1)
+    {
+        float elapsed = scaleClock.getElapsedTime().asSeconds();
+        float duration = 0.15f;
+        float t = std::min(elapsed / duration, 1.0f);
+        
+        float scale = currentScale + (targetScale - currentScale) * t;
+        
+        if (t >= 1.0f && targetScale == 1.0f)
+        {
+            scalingTile = sf::Vector2i(-1, -1);
+            
+            if (pendingSwapTile1.x != -1 && pendingSwapTile2.x != -1)
+            {
+                startSwapAnimation(pendingSwapTile1, pendingSwapTile2);
+                pendingSwapTile1 = sf::Vector2i(-1, -1);
+                pendingSwapTile2 = sf::Vector2i(-1, -1);
+            }
+        }
+        else if (t >= 1.0f && selectedTile.x != -1)
+        {
+            scale = targetScale;
+        }
+        
+        if (scalingTile.x != -1)
+        {
+            float tileSize = getTileSize();
+            float padding = getPadding();
+            float shapeSize = tileSize - padding * 2;
+            float scaledSize = shapeSize * scale;
+            float offset = (scaledSize - shapeSize) / 2.0f;
+            
+            RoundedRectangle scaledShape = shapes[scalingTile.y][scalingTile.x];
+            scaledShape.setSize(sf::Vector2f(scaledSize, scaledSize));
+            scaledShape.setPosition(sf::Vector2f(scalingTile.x * tileSize + padding - offset, 
+                                                  scalingTile.y * tileSize + padding - offset));
+            
+            window.draw(scaledShape);
+        }
+    }
+    else if (selectedTile.x != -1 && selectedTile.y != -1 && gameState == GameState::Idle)
+    {
+        float tileSize = getTileSize();
+        float padding = getPadding();
+        float scale = 1.18f;
+        
+        float shapeSize = tileSize - padding * 2;
+        float scaledSize = shapeSize * scale;
+        float offset = (scaledSize - shapeSize) / 2.0f;
+        
+        RoundedRectangle scaledShape = shapes[selectedTile.y][selectedTile.x];
+        scaledShape.setSize(sf::Vector2f(scaledSize, scaledSize));
+        scaledShape.setPosition(sf::Vector2f(selectedTile.x * tileSize + padding - offset, 
+                                              selectedTile.y * tileSize + padding - offset));
+        
+        window.draw(scaledShape);
+    }
 }
 
 void GameBoard::drawGrid(sf::RenderWindow &window)

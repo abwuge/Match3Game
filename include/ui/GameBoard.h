@@ -9,6 +9,7 @@
 enum class GameState
 {
     Idle,
+    Swapping,
     FallingInitial,
     CheckingMatches,
     ClearingMatches,
@@ -34,12 +35,27 @@ private:
     sf::Clock animationClock;
     GameState gameState = GameState::Idle;
 
+    sf::Vector2i selectedTile = sf::Vector2i(-1, -1);
+    sf::Vector2i swapTile1 = sf::Vector2i(-1, -1);
+    sf::Vector2i swapTile2 = sf::Vector2i(-1, -1);
+    bool isSwapReversing = false;
+    sf::Clock scaleClock;
+    float currentScale = 1.0f;
+    float targetScale = 1.0f;
+    sf::Vector2i scalingTile = sf::Vector2i(-1, -1);
+    sf::Vector2i pendingSwapTile1 = sf::Vector2i(-1, -1);
+    sf::Vector2i pendingSwapTile2 = sf::Vector2i(-1, -1);
+
     void initializeGame();
     void initializeShapes();
     void drawGrid(sf::RenderWindow &window);
     void updateAnimation();
     void startFallAnimation(const std::vector<sf::Vector2i> &affectedTiles = {});
     void checkAndClearMatches();
+    void handleTileClick(int row, int col);
+    void startSwapAnimation(const sf::Vector2i &tile1, const sf::Vector2i &tile2);
+    bool areAdjacent(const sf::Vector2i &tile1, const sf::Vector2i &tile2) const;
+    void drawSelectedHighlight(sf::RenderWindow &window);
     float getTileSize() const;
     float getPadding() const;
 };

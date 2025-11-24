@@ -192,3 +192,12 @@ void GameLogic::fillEmptySpaces()
         }
     }
 }
+
+void GameLogic::swapTiles(int row1, int col1, int row2, int col2)
+{
+    if (row1 >= 0 && row1 < height && col1 >= 0 && col1 < width &&
+        row2 >= 0 && row2 < height && col2 >= 0 && col2 < width)
+    {
+        std::swap(grid[row1][col1], grid[row2][col2]);
+    }
+}

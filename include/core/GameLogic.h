@@ -30,6 +30,7 @@ public:
     void clearMatches(const std::vector<Match> &matches);
     std::vector<sf::Vector2i> applyGravity();
     void fillEmptySpaces();
+    void swapTiles(int row1, int col1, int row2, int col2);
 
 private:
     int width;
