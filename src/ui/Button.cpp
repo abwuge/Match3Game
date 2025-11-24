@@ -1,11 +1,12 @@
 #include "ui/Button.h"
 
-Button::Button(const sf::Vector2f &position, const sf::Vector2f &size, const sf::Color &color)
+Button::Button(const sf::Vector2f &position, const sf::Vector2f &size, const sf::Color &color, float cornerRadius)
     : normalColor(color), hoverColor(color)
 {
     shape.setSize(size);
     shape.setPosition(position);
     shape.setFillColor(color);
+    shape.setCornerRadius(cornerRadius);
 }
 
 void Button::setPosition(const sf::Vector2f &position)
@@ -29,6 +30,11 @@ void Button::setHoverColor(const sf::Color &color)
     hoverColor = color;
 }
 
+void Button::setCornerRadius(float radius)
+{
+    shape.setCornerRadius(radius);
+}
+
 bool Button::isMouseOver(const sf::Vector2f &mousePos) const
 {
     return shape.getGlobalBounds().contains(mousePos);
@@ -46,12 +52,12 @@ void Button::updateHover(const sf::Vector2f &mousePos)
     }
 }
 
-sf::RectangleShape &Button::getShape()
+RoundedRectangle &Button::getShape()
 {
     return shape;
 }
 
-const sf::RectangleShape &Button::getShape() const
+const RoundedRectangle &Button::getShape() const
 {
     return shape;
 }

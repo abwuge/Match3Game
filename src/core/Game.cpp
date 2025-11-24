@@ -52,26 +52,10 @@ void Game::initializeGrid()
             float y = i * tileSize + padding;
 
             grid[i][j].color = dis(gen);
-            grid[i][j].fillColor = ColorManager::getColor(grid[i][j].color);
-
-            grid[i][j].centerH.setSize(sf::Vector2f(shapeSize - cornerRadius * 2, shapeSize));
-            grid[i][j].centerH.setPosition(sf::Vector2f(x + cornerRadius, y));
-            grid[i][j].centerH.setFillColor(grid[i][j].fillColor);
-
-            grid[i][j].centerV.setSize(sf::Vector2f(shapeSize, shapeSize - cornerRadius * 2));
-            grid[i][j].centerV.setPosition(sf::Vector2f(x, y + cornerRadius));
-            grid[i][j].centerV.setFillColor(grid[i][j].fillColor);
-
-            for (int k = 0; k < 4; k++)
-            {
-                grid[i][j].corners[k].setRadius(cornerRadius);
-                grid[i][j].corners[k].setFillColor(grid[i][j].fillColor);
-            }
-
-            grid[i][j].corners[0].setPosition(sf::Vector2f(x, y));
-            grid[i][j].corners[1].setPosition(sf::Vector2f(x + shapeSize - cornerRadius * 2, y));
-            grid[i][j].corners[2].setPosition(sf::Vector2f(x, y + shapeSize - cornerRadius * 2));
-            grid[i][j].corners[3].setPosition(sf::Vector2f(x + shapeSize - cornerRadius * 2, y + shapeSize - cornerRadius * 2));
+            grid[i][j].shape.setSize(sf::Vector2f(shapeSize, shapeSize));
+            grid[i][j].shape.setPosition(sf::Vector2f(x, y));
+            grid[i][j].shape.setCornerRadius(cornerRadius);
+            grid[i][j].shape.setFillColor(ColorManager::getColor(grid[i][j].color));
         }
     }
 }
@@ -97,10 +81,5 @@ void Game::drawGrid(sf::RenderWindow &window)
 
 void Game::drawTile(sf::RenderWindow &window, const Tile &tile)
 {
-    window.draw(tile.centerH);
-    window.draw(tile.centerV);
-    for (int i = 0; i < 4; i++)
-    {
-        window.draw(tile.corners[i]);
-    }
+    window.draw(tile.shape);
 }

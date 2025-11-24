@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "Scene.h"
+#include "utils/RoundedRectangle.h"
 
 const int GRID_SIZE = 8;
 const int NUM_COLORS = 6;
@@ -10,10 +11,7 @@ const int NUM_COLORS = 6;
 struct Tile
 {
     int color;
-    sf::RectangleShape centerH;
-    sf::RectangleShape centerV;
-    sf::CircleShape corners[4];
-    sf::Color fillColor;
+    RoundedRectangle shape;
 };
 
 class Game : public Scene
