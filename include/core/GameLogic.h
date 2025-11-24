@@ -6,6 +6,12 @@
 struct Tile
 {
     int colorIndex;
+    bool isEmpty = false;
+};
+
+struct Match
+{
+    std::vector<sf::Vector2i> positions;
 };
 
 class GameLogic
@@ -17,7 +23,13 @@ public:
     int getWidth() const { return width; }
     int getHeight() const { return height; }
     int getColorIndex(int row, int col) const;
+    bool isEmpty(int row, int col) const;
     const std::vector<int> &getAvailableColors() const { return availableColorIndices; }
+    
+    std::vector<Match> findMatches();
+    void clearMatches(const std::vector<Match> &matches);
+    std::vector<sf::Vector2i> applyGravity();
+    void fillEmptySpaces();
 
 private:
     int width;
@@ -25,4 +37,7 @@ private:
     int numColors;
     std::vector<std::vector<Tile>> grid;
     std::vector<int> availableColorIndices;
+    
+    void findHorizontalMatches(std::vector<Match> &matches);
+    void findVerticalMatches(std::vector<Match> &matches);
 };
