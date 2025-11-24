@@ -1,113 +1,242 @@
-# CMake SFML Project Template
+# Match3Game
 
-This repository template should allow for a fast and hassle-free kick start of your next SFML project using CMake.
-Thanks to [GitHub's nature of templates](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template), you can fork this repository without inheriting its Git history.
+一个基于 SFML 3.0 开发的现代化三消益智游戏，采用 C++17 标准实现。
 
-The template starts out very basic, but might receive additional features over time:
+## 项目简介
 
-- Basic CMake script to build your project and link SFML on any operating system
-- Basic [GitHub Actions](https://github.com/features/actions) script for all major platforms
+Match3Game 是一款经典的三消类游戏，玩家通过拖拽或点击交换相邻的彩色方块，使三个或更多相同颜色的方块连成一线即可消除。游戏具有流畅的动画效果和完善的场景管理系统。
 
-## Quick start
+### 核心特性
 
-### Command line
+- ✅ **流畅动画** - 平滑的交换、下落、消除动画
+- ✅ **直观交互** - 支持鼠标拖拽和点击操作
+- ✅ **自动消除** - 智能检测并自动消除匹配方块
+- ✅ **重力系统** - 方块自动下落填充空位
+- ✅ **场景管理** - 主菜单、游戏场景、设置界面
+- ✅ **可配置参数** - 灵活的网格大小和颜色配置
+- ✅ **圆角美化** - 现代化的圆角矩形渲染
+- ✅ **快捷键支持** - 完整的键盘操作支持
 
-1. Install [Git](https://git-scm.com/downloads) and [CMake](https://cmake.org/download/). Use your system's package manager if available.
-2. Follow [GitHub's instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) for how to use their project template feature to create your own project. If you don't want to use GitHub, see the section below.
-3. Clone your new GitHub repo and open the repo in your text editor of choice.
-4. Open [CMakeLists.txt](CMakeLists.txt). Rename the project and the target name of the executable to whatever name you want. Make sure to change all occurrences.
-5. If you want to add or remove any .cpp files, change the source files listed in the `add_executable` call in CMakeLists.txt to match the source files your project requires. If you plan on keeping the default main.cpp file then no changes are required.
-6. If your code uses the Audio or Network modules then add `SFML::Audio` or `SFML::Network` to the `target_link_libraries` call alongside the existing `SFML::Graphics` library that is being linked.
-7. If you use Linux, install SFML's dependencies using your system package manager. On Ubuntu and other Debian-based distributions you can use the following commands:
+### 技术栈
+
+- **语言**: C++17
+- **图形库**: SFML 3.0.2
+- **构建工具**: CMake 3.28+
+- **编译器**: MinGW (GCC/G++)
+
+### 项目结构
+
+```
+Match3Game/
+├── include/          # 头文件
+│   ├── core/        # 核心系统（场景管理、游戏逻辑）
+│   ├── ui/          # UI组件（按钮、游戏板、菜单）
+│   └── utils/       # 工具类（配置、颜色管理、圆角矩形）
+├── src/             # 源文件
+│   ├── main.cpp     # 程序入口
+│   ├── core/
+│   ├── ui/
+│   └── utils/
+├── docs/            # 项目文档
+└── build/           # 构建输出目录
+```
+
+## 开发环境搭建
+
+### 前置要求
+
+1. **CMake** 3.28 或更高版本
+   - 下载地址: https://cmake.org/download/
+   
+2. **MinGW** (推荐 MinGW-w64)
+   - 下载地址: https://www.mingw-w64.org/
+   - 确保 `gcc`、`g++` 和 `mingw32-make` 在系统 PATH 中
+
+3. **Git** (用于克隆项目和下载依赖)
+   - 下载地址: https://git-scm.com/downloads
+
+4. **Visual Studio Code** (推荐)
+   - 安装 C/C++ 扩展
+   - 安装 CMake Tools 扩展
+
+### 环境配置步骤
+
+#### Windows 环境
+
+1. **克隆项目**
+   ```powershell
+   git clone <repository-url>
+   cd Match3Game
    ```
+
+2. **配置 CMake**
+   ```powershell
+   cmake -S . -B build -G "MinGW Makefiles"
+   ```
+
+3. **构建项目**
+   
+   Debug 版本（推荐开发时使用）:
+   ```powershell
+   cmake --build build --config Debug -- -j
+   ```
+   
+   Release 版本（性能优化）:
+   ```powershell
+   cmake --build build --config Release -- -j
+   ```
+
+4. **运行程序**
+   ```powershell
+   .\build\bin\Match3Game.exe
+   ```
+
+#### Linux 环境
+
+1. **安装依赖**
+   ```bash
    sudo apt update
-   sudo apt install \
-       libxrandr-dev \
-       libxcursor-dev \
-       libxi-dev \
-       libudev-dev \
-       libfreetype-dev \
-       libflac-dev \
-       libvorbis-dev \
-       libgl1-mesa-dev \
-       libegl1-mesa-dev \
-       libfreetype-dev
+   sudo apt install build-essential cmake git \
+       libxrandr-dev libxcursor-dev libxi-dev libudev-dev \
+       libfreetype-dev libflac-dev libvorbis-dev \
+       libgl1-mesa-dev libegl1-mesa-dev
    ```
-8. Configure and build your project. Most popular IDEs support CMake projects with very little effort on your part.
 
-   - [VS Code](https://code.visualstudio.com) via the [CMake extension](https://code.visualstudio.com/docs/cpp/cmake-linux)
-   - [Visual Studio](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170)
-   - [CLion](https://www.jetbrains.com/clion/features/cmake-support.html)
-   - [Qt Creator](https://doc.qt.io/qtcreator/creator-project-cmake.html)
-
-   Using CMake from the command line is straightforward as well.
-   Be sure to run these commands in the root directory of the project you just created.
-
-   ```
+2. **构建和运行**
+   ```bash
+   git clone https://github.com/abwuge/Match3Game.git
+   cd Match3Game
    cmake -B build
    cmake --build build
+   ./build/bin/Match3Game
    ```
 
-9. Enjoy!
+### 使用 VS Code
 
-### Visual Studio
+1. 打开项目文件夹
+2. CMake 扩展会自动检测配置
+3. 使用底部状态栏的按钮：
+   - **Configure** - 配置 CMake
+   - **Build** - 构建项目
+   - **Run** - 运行程序
 
-Using a Visual Studio workspace is the simplest way to get started on windows.
+或使用预配置的任务：
+- `Ctrl+Shift+P` → `Tasks: Run Task`
+- 选择 `Build Debug` 或 `Build Release`
 
-1. Ensure you have the [required components installed](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio#installation).
-2. Follow [GitHub's instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) for how to use their project template feature to create your own project.
-3. If you have already cloned this repo, you can [open the folder](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio0#ide-integration).
-4. If not, you can [clone it directly in Visual Studio](https://learn.microsoft.com/en-us/visualstudio/get-started/tutorial-open-project-from-repo).
+## 使用说明
 
-Visual Studio should automatically configure the CMake project, then you can build and run as normal through Visual Studio. See the links above for more details.
+### 游戏操作
 
-## Upgrading SFML
+- **鼠标拖拽**: 按住方块并拖动到相邻位置
+- **鼠标点击**: 点击两个相邻方块进行交换
+- **ESC 键**: 返回主菜单或退出游戏
+- **空格键**: 暂停/继续游戏（开发中）
 
-SFML is found via CMake's [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) module.
-FetchContent automatically downloads SFML from GitHub and builds it alongside your own code.
-Beyond the convenience of not having to install SFML yourself, this ensures ABI compatibility and simplifies things like specifying static versus shared libraries.
+### 游戏规则
 
-Modifying what version of SFML you want is as easy as changing the `GIT_TAG` argument.
-Currently it uses SFML 3 via the `3.0.2` tag.
+1. 交换相邻的方块使得三个或更多相同颜色连成直线
+2. 匹配的方块会被消除
+3. 上方的方块会自动下落填充空位
+4. 如果交换后无法形成匹配，方块会自动恢复原位
 
-## But I want to...
+### 配置参数
 
-Modify CMake options by adding them as configuration parameters (with a `-D` flag) or by modifying the contents of CMakeCache.txt and rebuilding.
+可在 `include/utils/GameConfig.h` 中修改游戏参数：
 
-### Not use GitHub
+- `GRID_SIZE`: 游戏网格大小（默认 8×8）
+- `NUM_COLORS`: 方块颜色数量（默认 6 种）
+- `TILE_SIZE`: 方块尺寸
+- `ANIMATION_SPEED`: 动画速度
 
-You can use this project without a GitHub account by [downloading the contents](https://github.com/SFML/cmake-sfml-project/archive/refs/heads/master.zip) of the repository as a ZIP archive and unpacking it locally.
-This approach also avoids using Git entirely if you would prefer to not do that.
+## 项目文档
 
-### Change Compilers
+详细的技术文档请查看 `docs` 目录：
 
-See the variety of [`CMAKE_<LANG>_COMPILER`](https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER.html) options.
-In particular you'll want to modify `CMAKE_CXX_COMPILER` to point to the C++ compiler you wish to use.
+- **[完整项目文档](docs/PROJECT_DOCUMENTATION.md)** - 详细的系统架构和模块说明
+- **[架构图集](docs/ARCHITECTURE_DIAGRAMS.md)** - 系统架构图、类图、流程图
+- **[API 参考](docs/API_REFERENCE.md)** - 完整的 API 文档
 
-### Change Compiler Optimizations
+## 构建选项
 
-CMake abstracts away specific optimizer flags through the [`CMAKE_BUILD_TYPE`](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html) option.
-By default this project recommends `Release` builds which enable optimizations.
-Other build types include `Debug` builds which enable debug symbols but disable optimizations.
-If you're using a multi-configuration generator (as is often the case on Windows), you can modify the [`CMAKE_CONFIGURATION_TYPES`](https://cmake.org/cmake/help/latest/variable/CMAKE_CONFIGURATION_TYPES.html#variable:CMAKE_CONFIGURATION_TYPES) option.
+### 更改构建类型
 
-### Change Generators
+Debug 模式（包含调试符号）:
+```powershell
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+```
 
-While CMake will attempt to pick a suitable default generator, some systems offer a number of generators to choose from.
-Ubuntu, for example, offers Makefiles and Ninja as two potential options.
-For a list of generators, click [here](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html).
-To modify the generator you're using you must reconfigure your project providing a `-G` flag with a value corresponding to the generator you want.
-You can't simply modify an entry in the CMakeCache.txt file unlike the above options.
-Then you may rebuild your project with this new generator.
+Release 模式（性能优化）:
+```powershell
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+```
 
-## More Reading
+### 清理构建
 
-Here are some useful resources if you want to learn more about CMake:
+```powershell
+Remove-Item -Recurse -Force build
+cmake -S . -B build -G "MinGW Makefiles"
+```
 
-- [Official CMake Tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/)
-- [How to Use CMake Without the Agonizing Pain - Part 1](https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-1.html)
-- [How to Use CMake Without the Agonizing Pain - Part 2](https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-2.html)
-- [Better CMake YouTube series by Jefferon Amstutz](https://www.youtube.com/playlist?list=PL8i3OhJb4FNV10aIZ8oF0AA46HgA2ed8g)
+## 依赖管理
+
+项目使用 CMake 的 **FetchContent** 自动管理依赖：
+
+- SFML 3.0.2 会在首次构建时自动下载和编译
+- 无需手动安装 SFML
+- 确保网络连接正常
+
+### 升级 SFML 版本
+
+修改 `CMakeLists.txt` 中的 `GIT_TAG`:
+```cmake
+FetchContent_Declare(SFML
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 3.0.2  # 修改此处版本号
+    ...
+)
+```
+
+## 故障排除
+
+### 常见问题
+
+**Q: CMake 找不到编译器**  
+A: 确保 MinGW 的 `bin` 目录在系统 PATH 中，运行 `gcc --version` 验证。
+
+**Q: 构建时网络错误**  
+A: SFML 下载需要网络连接，可使用代理或手动下载。
+
+**Q: 运行时找不到 DLL**  
+A: Debug 模式下所需的 DLL 会自动复制到 `build/bin` 目录。
+
+**Q: 编译错误 C++17 特性**  
+A: 确保编译器支持 C++17，GCC 7+ 或 MSVC 2017+。
+
+## 开发计划
+
+- [ ] 添加分数系统
+- [ ] 实现关卡系统
+- [ ] 添加音效和背景音乐
+- [ ] 特殊方块和道具
+- [ ] 存档系统
+- [ ] 游戏设置界面完善
+
+## 贡献指南
+
+欢迎贡献代码或提出建议！请遵循：
+
+1. Fork 本项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+## 相关资源
+
+- [SFML 官方文档](https://www.sfml-dev.org/documentation/3.0.0/)
+- [CMake 官方教程](https://cmake.org/cmake/help/latest/guide/tutorial/)
+- [C++17 特性参考](https://en.cppreference.com/w/cpp/17)
 
 ## License
 
