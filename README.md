@@ -65,7 +65,7 @@ Match3Game/
 
 1. **克隆项目**
    ```powershell
-   git clone <repository-url>
+   git clone https://github.com/abwuge/Match3Game.git
    cd Match3Game
    ```
 
