@@ -113,16 +113,122 @@ Match3Game/
 
 ### 使用 VS Code
 
-1. 打开项目文件夹
-2. CMake 扩展会自动检测配置
-3. 使用底部状态栏的按钮：
-   - **Configure** - 配置 CMake
-   - **Build** - 构建项目
-   - **Run** - 运行程序
+推荐的 VS Code 设置：
 
-或使用预配置的任务：
-- `Ctrl+Shift+P` → `Tasks: Run Task`
-- 选择 `Build Debug` 或 `Build Release`
+- launch.json:
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Match3Game",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/bin/Match3Game.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build Debug"
+    },
+    {
+      "name": "Release Match3Game",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/bin/Match3Game.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build Release"
+    }
+  ]
+}
+```
+
+- tasks.json:
+```json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake Configure",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S",
+                ".",
+                "-B",
+                "build",
+                "-G",
+                "MinGW Makefiles"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build",
+                "--config",
+                "Debug",
+                "--",
+                "-j"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "CMake Configure",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Build Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build",
+                "--config",
+                "Release",
+                "--",
+                "-j"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "dependsOn": "CMake Configure",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}
+```
 
 ## 使用说明
 
